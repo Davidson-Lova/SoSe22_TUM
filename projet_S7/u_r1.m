@@ -1,3 +1,3 @@
-function output_me = u_r1(tetha1)
-  output_me = [cos(tetha1);sin(tetha1)];
+function output_me = u_r1(theta1)
+  output_me = [cos(theta1);sin(theta1)];
 endfunction
