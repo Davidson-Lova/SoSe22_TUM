@@ -1,5 +1,8 @@
 clear all;
-%Pour test la fonction f2
+%schéma 1
+a=0;
+b=1;
+
 data.r = 0;
 data.r1 = 0;
 data.r2 = 0;
@@ -12,5 +15,4 @@ data.mu0 = 0;
 data.mu1 = 0;
 data.mu2 = 0;
 
-theta2 = 0;
-res1 = f2(theta2,data);
+N = 100;
