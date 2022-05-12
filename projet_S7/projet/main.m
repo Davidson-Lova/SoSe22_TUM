@@ -29,9 +29,13 @@ tspan = [t0 tf];
 N = 100;
  
 [t1,y1] = ode45(odefun,tspan,y0);
-[t2,y2] = redAB3(odefun,t0,tf,y0,N);
+%[t2,y2] = redTGA(odefun,t0,tf,y0,N);
+%[t3,y3] = redRK4(odefun,t0,tf,y0,N);
+%[t4,y4] = redPC4(odefun,t0,tf,y0,N);
+%[t5,y5] = redEUP(odefun,t0,tf,y0,N);
+[t6,y6] = redAB3(odefun,t0,tf,y0,N);
 
 figure(1);clf; hold on;
 plot(t1,y1(:,1));
-plot(t2',(y2')(:,1));
+plot(t6',(y6')(:,1));
 hold off;
