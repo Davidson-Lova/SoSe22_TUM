@@ -1,6 +1,6 @@
 % C'est ici qu'on va faire les trucs
-%Données
 
+%Données
 data.r = 1;
 data.r1 = 1;
 data.r2 = 1;
@@ -29,7 +29,6 @@ tspan = [t0 tf];
 N = 100;
  
 [t1,y1] = ode45(odefun,tspan,y0);
-
 [t2,y2] = redAB3(odefun,t0,tf,y0,N);
 
 figure(1);clf; hold on;
