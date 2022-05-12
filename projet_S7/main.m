@@ -26,5 +26,13 @@ tf = 10;
 y0 =[theta1_0,theta2_0,tau1_0,tau2_0];
 
 tspan = [t0 tf];
+N = 100;
  
-[t,y] = ode45(odefun,tspan,y0);
+[t1,y1] = ode45(odefun,tspan,y0);
+
+[t2,y2] = redAB3(odefun,t0,tf,y0,N);
+
+figure(1);clf; hold on;
+plot(t1,y1(:,1));
+plot(t2',(y2')(:,1));
+hold off;
