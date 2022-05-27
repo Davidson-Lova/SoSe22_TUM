@@ -26,7 +26,7 @@ for j = 1:n
 end
 
 % calculate right-hand side vector of FD-system
-rhs =  f(xpts,ypts); % TODO
+rhs =  6*(h^2)*f(xpts,ypts); % TODO
 
 % assemble system matrix using the sparse format
 N = n*n;
@@ -36,27 +36,46 @@ value_list = [];
 
 row_list = [row_list 1:N];
 col_list = [col_list 1:N];
-value_list = 4*ones(1,N);
+value_list = (20)*ones(1,N);
 
 %for points on left and right
 for i = 1:n
   row_list = [row_list (i-1)*n+(1:(n-1))];
   col_list = [col_list (i-1)*n+(2:n)];
-  value_list = [value_list (-1)*ones(1,n-1)];
+  value_list = [value_list (-4)*ones(1,n-1)];
 
   row_list = [row_list (i-1)*n+(2:n)];
   col_list = [col_list (i-1)*n+(1:(n-1))];
-  value_list = [value_list (-1)*ones(1,n-1)];
+  value_list = [value_list (-4)*ones(1,n-1)];
 endfor
 
 %for point on top and bottom
 row_list = [row_list n+1:N];
 col_list = [col_list 1:N-n];
-value_list = [value_list (-1)*ones(1,N-n)];
+value_list = [value_list (-4)*ones(1,N-n)];
 
 row_list = [row_list 1:N-n];
 col_list = [col_list n+1:N];
-value_list = [value_list (-1)*ones(1,N-n)];
+value_list = [value_list (-4)*ones(1,N-n)];
+
+%for points on the corners
+for i = 2:n
+  row_list = [row_list (i-2)*n+(1:(n-1))];
+  col_list = [col_list (i-1)*n+(2:n)];
+  value_list = [value_list (-1)*ones(1,n-1)];
+
+  row_list = [row_list (i-1)*n+(2:n)];
+  col_list = [col_list (i-2)*n+(1:(n-1))];
+  value_list = [value_list (-1)*ones(1,n-1)];
+
+  row_list = [row_list (i-2)*n+(2:n)];
+  col_list = [col_list (i-1)*n+(1:(n-1))];
+  value_list = [value_list (-1)*ones(1,n-1)];
+
+  row_list = [row_list (i-1)*n+(1:(n-1))];
+  col_list = [col_list (i-2)*n+(2:n)];
+  value_list = [value_list (-1)*ones(1,n-1)];    
+endfor
 % NOTE:
 % The sparse format works as follows:
 % row_list = list of row-indices of non-zero entries in matrix
@@ -78,19 +97,23 @@ value_list = [value_list (-1)*ones(1,N-n)];
 
 % assemble system matrix
 
-A = (1/(h^2))*sparse(row_list, col_list, value_list, N,N);
-spy(A);
+A = sparse(row_list, col_list, value_list, N,N);
+
 
 % solve linear FD-system for u
 u = A\rhs; % TODO
 
 % plot the calculated solution
-figure(1)
+figure(1); hold on;
 plot_solution(n,h,u);
+
 
 % plot the reference solution for f(x,y) = 2*pi^2 * sin(pi*x).*sin(pi*y);
 figure(2)
 uref = u_ref(xpts,ypts);
 plot_solution(n,h,uref);
-zlim([0, 1.2])
 
+zlim([0, 1.2])
+hold off;
+
+max(abs((u-uref)(:)))

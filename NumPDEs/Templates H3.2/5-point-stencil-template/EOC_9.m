@@ -1,21 +1,17 @@
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Implementation of the five-point-stencil for 
-% the Poisson problem with homogeneous Dirichlet boundary 
-% conditions on the unit square (0,1)^2
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+clear all;
 
-% clear
-clear all
+l = 5;
+for k = 1:l
 
 % define mesh width
-h = 1/100; 
+h(k) = (1/5)*(2^(-k));
 
 % number of non-boundary nodes in each row
-n = 1/h - 1;
+n = 1/h(k) - 1;
 
 %  calculate coordinates of non-boundary nodes in x and y direction 
-xcoor = h*[1:n]';
-ycoor = h*[1:n]';
+xcoor = h(k)*[1:n]';
+ycoor = h(k)*[1:n]';
 
 %  calculate coordinates at all nodes using the ordering from the lecture
 xpts = [];
@@ -26,7 +22,7 @@ for j = 1:n
 end
 
 % calculate right-hand side vector of FD-system
-rhs =  f(xpts,ypts); % TODO
+rhs =  6*(h(k)^2)*f(xpts,ypts); % TODO
 
 % assemble system matrix using the sparse format
 N = n*n;
@@ -36,27 +32,47 @@ value_list = [];
 
 row_list = [row_list 1:N];
 col_list = [col_list 1:N];
-value_list = 4*ones(1,N);
+value_list = (20)*ones(1,N);
+
 
 %for points on left and right
 for i = 1:n
   row_list = [row_list (i-1)*n+(1:(n-1))];
   col_list = [col_list (i-1)*n+(2:n)];
-  value_list = [value_list (-1)*ones(1,n-1)];
+  value_list = [value_list (-4)*ones(1,n-1)];
 
   row_list = [row_list (i-1)*n+(2:n)];
   col_list = [col_list (i-1)*n+(1:(n-1))];
-  value_list = [value_list (-1)*ones(1,n-1)];
+  value_list = [value_list (-4)*ones(1,n-1)];
 endfor
 
 %for point on top and bottom
 row_list = [row_list n+1:N];
 col_list = [col_list 1:N-n];
-value_list = [value_list (-1)*ones(1,N-n)];
+value_list = [value_list (-4)*ones(1,N-n)];
 
 row_list = [row_list 1:N-n];
 col_list = [col_list n+1:N];
-value_list = [value_list (-1)*ones(1,N-n)];
+value_list = [value_list (-4)*ones(1,N-n)];
+
+%for points on the corners
+for i = 2:n
+  row_list = [row_list (i-2)*n+(1:(n-1))];
+  col_list = [col_list (i-1)*n+(2:n)];
+  value_list = [value_list (-1)*ones(1,n-1)];
+
+  row_list = [row_list (i-1)*n+(2:n)];
+  col_list = [col_list (i-2)*n+(1:(n-1))];
+  value_list = [value_list (-1)*ones(1,n-1)];
+
+  row_list = [row_list (i-2)*n+(2:n)];
+  col_list = [col_list (i-1)*n+(1:(n-1))];
+  value_list = [value_list (-1)*ones(1,n-1)];
+
+  row_list = [row_list (i-1)*n+(1:(n-1))];
+  col_list = [col_list (i-2)*n+(2:n)];
+  value_list = [value_list (-1)*ones(1,n-1)];    
+endfor
 % NOTE:
 % The sparse format works as follows:
 % row_list = list of row-indices of non-zero entries in matrix
@@ -78,19 +94,26 @@ value_list = [value_list (-1)*ones(1,N-n)];
 
 % assemble system matrix
 
-A = (1/(h^2))*sparse(row_list, col_list, value_list, N,N);
-spy(A);
+A = sparse(row_list, col_list, value_list, N,N);
 
 % solve linear FD-system for u
 u = A\rhs; % TODO
 
-% plot the calculated solution
-figure(1)
-plot_solution(n,h,u);
-
-% plot the reference solution for f(x,y) = 2*pi^2 * sin(pi*x).*sin(pi*y);
-figure(2)
 uref = u_ref(xpts,ypts);
-plot_solution(n,h,uref);
-zlim([0, 1.2])
 
+err_abs(k) = max(abs((u-uref)(:)));
+endfor
+
+figure(1); clf; hold on;
+loglog(h,0.1*h.^2,'r-o');
+loglog(h,0.1*h.^3,'b-o');
+loglog(h,h,'k-d');
+loglog(h,err_abs,'r');
+legend('O(h^3)','O(h^2)','O(h)','Erreur(h)');
+xlabel('h');
+ylabel('Erreur');
+grid on;
+hold off;
+
+
+alpha = (log(err_abs(end))-log(err_abs(end-1)))/(log(h(end))-log(h(end-1)));

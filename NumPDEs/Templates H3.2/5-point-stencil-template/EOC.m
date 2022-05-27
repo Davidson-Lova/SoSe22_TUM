@@ -1,21 +1,17 @@
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Implementation of the five-point-stencil for 
-% the Poisson problem with homogeneous Dirichlet boundary 
-% conditions on the unit square (0,1)^2
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+clear all;
 
-% clear
-clear all
+l = 5;
+for k = 1:l
 
 % define mesh width
-h = 1/100; 
+h(k) = (1/5)*(2^(-k));
 
 % number of non-boundary nodes in each row
-n = 1/h - 1;
+n = 1/h(k) - 1;
 
 %  calculate coordinates of non-boundary nodes in x and y direction 
-xcoor = h*[1:n]';
-ycoor = h*[1:n]';
+xcoor = h(k)*[1:n]';
+ycoor = h(k)*[1:n]';
 
 %  calculate coordinates at all nodes using the ordering from the lecture
 xpts = [];
@@ -57,6 +53,7 @@ value_list = [value_list (-1)*ones(1,N-n)];
 row_list = [row_list 1:N-n];
 col_list = [col_list n+1:N];
 value_list = [value_list (-1)*ones(1,N-n)];
+
 % NOTE:
 % The sparse format works as follows:
 % row_list = list of row-indices of non-zero entries in matrix
@@ -78,19 +75,24 @@ value_list = [value_list (-1)*ones(1,N-n)];
 
 % assemble system matrix
 
-A = (1/(h^2))*sparse(row_list, col_list, value_list, N,N);
-spy(A);
+A = (1/(h(k)^2))*sparse(row_list, col_list, value_list, N,N);
 
 % solve linear FD-system for u
 u = A\rhs; % TODO
-
-% plot the calculated solution
-figure(1)
-plot_solution(n,h,u);
-
-% plot the reference solution for f(x,y) = 2*pi^2 * sin(pi*x).*sin(pi*y);
-figure(2)
 uref = u_ref(xpts,ypts);
-plot_solution(n,h,uref);
-zlim([0, 1.2])
 
+err_abs(k) = max(abs((u-uref)(:)));
+endfor
+
+figure(1); clf; hold on;
+loglog(h,0.1*h.^2,'k-o');
+loglog(h,h,'k-d');
+loglog(h,err_abs,'r');
+legend('O(h^2)','O(h)','Erreur(h)');
+xlabel('h');
+ylabel('Erreur');
+grid on;
+hold off;
+
+
+alpha = (log(err_abs(end))-log(err_abs(end-1)))/(log(h(end))-log(h(end-1)));
